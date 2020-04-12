@@ -1,85 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <!-- Required meta tags -->
     <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, shrink-to-fit=no"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
     <!-- Bootstrap CSS -->
-    <link
-      rel="stylesheet"
-      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
-      crossorigin="anonymous"
-    />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
 
     <title>Todo List Application</title>
-  </head>
+</head>
 
-  <body>
+<body>
     <div class="container">
-      <div class="row">
-        <div class="col-lg-2"></div>
-        <div class="col-lg-8">
-          <form id="form">
-            <div class="form-group">
-              <label for="todo">Todo: </label>
-              <input type="text" class="form-control" id="todoUserInput" />
+        <div class="row">
+            <div class="col-lg-2"></div>
+            <div class="col-lg-8">
+                <form id="form">
+                    <div class="form-group">
+                        <label for="todo">Todo: </label>
+                        <input type="text" class="form-control" id="todoUserInput" />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Create</button>
+                </form>
             </div>
-            <button type="submit" class="btn btn-primary">Create</button>
-          </form>
+            <div class="col-lg-2"></div>
         </div>
-        <div class="col-lg-2"></div>
-      </div>
-      <div class="row">
-        <div class="col-lg-2"></div>
-        <div class="col-lg-8">
-          <ul class="list-group" id="display"></ul>
+        <div class="row">
+            <div class="col-lg-2"></div>
+            <div class="col-lg-8">
+                <ul class="list-group" id="display"></ul>
+            </div>
+            <div class="col-lg-2"></div>
         </div>
-        <div class="col-lg-2"></div>
-      </div>
     </div>
-  </body>
+</body>
 
-  <script
-    src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
     integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
-    crossorigin="anonymous"
-  ></script>
-  <script
-    src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+    crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
     integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
-    crossorigin="anonymous"
-  ></script>
-  <script
-    src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+    crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
     integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
-    crossorigin="anonymous"
-  ></script>
-  <script>
+    crossorigin="anonymous"></script>
+<script>
     $(document).ready(() => {
-      const display = $("#display");
-      const form = $("#form");
-      const todoUserInput = $("#todoUserInput");
+        const display = $("#display");
+        const form = $("#form");
+        const todoUserInput = $("#todoUserInput");
 
-      const resetTodoInput = () => {
-        todoUserInput.val("");
-      };
 
-      const buildIDS = (todo) => {
-        return {
-          editID: `edit_${todo.id}`,
-          deleteID: `delete_${todo.id}`,
-          listItemID: `listItem_${todo.id}`,
-          todoID: `todo_${todo.id}`,
+        const getTodos = () => {
+            fetch("/getTodos", { method: 'get' }).then((res) => {
+                return res.json();
+            }).then((data) => {
+                console.log(data);
+                displayTodos(data);
+            });
+        }
+
+        getTodos();
+
+        const resetTodoInput = () => {
+            todoUserInput.val("");
         };
-      };
 
-      const buildTemplate = (todo, ids) => {
-        return `
+        const buildIDS = (todo) => {
+            return {
+                editID: `edit_${todo.id}`,
+                deleteID: `delete_${todo.id}`,
+                listItemID: `listItem_${todo.id}`,
+                todoID: `todo_${todo.id}`,
+            };
+        };
+
+        const buildTemplate = (todo, ids) => {
+            return `
             <li class="list-group-item" id="${ids.listItemID}">
                 <div class="row">
                     <div class="col-md-4" id="${ids.todoID}"> ${todo.todo} </div>
@@ -91,21 +91,22 @@
                          </div>
                 </li>
             `;
-      };
+        };
 
 
-      const displayTodos = (data) => {
-        data.forEach((todo) => {
-            let ids = buildIDS(todo);
-            display.append(buildTemplate(todo, ids));
-            editTodo(todo, ids.todoID, ids.editID);
-            deleteTodo(todo, ids.todoID, ids.deleteID);
-        });
-      }
+        const displayTodos = (data) => {
+            data.forEach((todo) => {
+                let ids = buildIDS(todo);
+                display.append(buildTemplate(todo, ids));
+                // editTodo(todo, ids.todoID, ids.editID);
+                // deleteTodo(todo, ids.todoID, ids.deleteID);
+            });
+        }
 
 
 
 
     });
-  </script>
+</script>
+
 </html>
