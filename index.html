@@ -103,6 +103,30 @@
             });
         }
 
+        form.submit((e) => {
+            e.preventDefault();
+            fetch("/", {
+                method: 'post',
+                body: JSON.stringify({ todo : todoUserInput.val()}), 
+                headers: {
+                    'Content-Type' : 'application/json'
+                }
+            }).then(res => {
+                return res.json();
+            }).then(data => {
+                if (data.result.ok == 1 && data.result.n == 1) {
+                    let ids = buildIDS(data.document);
+                    display.append(buildTemplate(data.document, ids));
+                    // editTodo(data.doscument, ids.todoID, ids.editID);
+                    // deleteTodo(sdata.document, ids.todoID, ids.deleteID);
+                }
+            });
+        });
+
+
+
+
+
 
 
 
