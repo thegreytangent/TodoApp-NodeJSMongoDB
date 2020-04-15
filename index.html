@@ -18,6 +18,16 @@
     <div class="row">
       <div class="col-lg-2"></div>
       <div class="col-lg-8">
+        <div class="alert" role="alert" id="message">
+
+        </div>
+      </div>
+      <div class="col-lg-2"></div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-2"></div>
+      <div class="col-lg-8">
         <form id="form">
           <div class="form-group">
             <label for="todo">Todo: </label>
@@ -52,13 +62,29 @@ $(document).ready(() => {
   const display = $("#display");
   const form = $("#form");
   const todoUserInput = $("#todoUserInput");
+  const message = $("#message");
+  message.hide();
+
+  const displayMessage = (flag, msg) => {
+    if (flag) {
+      message.removeClass("alert-danger");
+      message.addClass("alert-success");
+      message.html(msg);
+      message.show();
+    } else {
+      message.removeClass("alert-success");
+      message.addClass("alert-danger");
+      message.html(msg);
+      message.show();
+    }
+  }
+
 
 
   const getTodos = () => {
     fetch("/getTodos", { method: 'get' }).then((res) => {
       return res.json();
     }).then((data) => {
-      console.log(data);
       displayTodos(data);
     });
   }
@@ -116,12 +142,23 @@ $(document).ready(() => {
     }).then(res => {
       return res.json();
     }).then(data => {
-      if (data.result.ok == 1 && data.result.n == 1) {
-        let ids = buildIDS(data.document);
-        display.append(buildTemplate(data.document, ids));
-        editTodo(data.document, ids.todoID, ids.editID);
-        deleteTodo(data.document, ids.listItemID, ids.deleteID);
+      console.log("error ", data);
+      if (!data.error) {
+        if (data.result.ok == 1 && data.result.n == 1) {
+          let ids = buildIDS(data.document);
+          display.append(buildTemplate(data.document, ids));
+          editTodo(data.document, ids.todoID, ids.editID);
+          deleteTodo(data.document, ids.listItemID, ids.deleteID);
+          displayMessage(true, data.msg);
+        }
+
+      } else {
+        displayMessage(false, data.msg);
       }
+
+
+
+
       resetTodoInput();
     });
   });
@@ -129,16 +166,12 @@ $(document).ready(() => {
 
 
   const editTodo  = (todo, todoID, editID) => {
-    console.log({
-      todo:  todo,
-      todoID: todoID,
-      editID: editID
-    });
+
     let editBtn = $(`#${editID}`);
 
 
     editBtn.click(() => {
-      console.log("my edit => ", editID);
+
       fetch(`/${todo._id}`, {
         method: "put",
         headers: {
@@ -150,7 +183,7 @@ $(document).ready(() => {
       }).then((data) => {
         if (data.ok == 1) {
           let todoIndex = $(`#${todoID}`);
-          console.log("data value ",data.value.todo );
+
           todoIndex.html(data.value.todo);
           resetTodoInput();
         }
@@ -161,11 +194,7 @@ $(document).ready(() => {
 
 
   const deleteTodo = (todo, listItemID, deleteID) => {
-    console.log({
-      todo: todo,
-      listItemID: listItemID,
-      deleteID: deleteID
-    })
+
 
     let deleteBtn =$(`#${deleteID}`);
     deleteBtn.click(() => {

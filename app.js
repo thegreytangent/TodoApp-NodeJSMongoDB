@@ -3,9 +3,15 @@ const bodyParser = require("body-parser");
 const app = express();
 app.use(bodyParser.json());
 const path = require('path');
+const Joi = require('joi');
 
 const db = require('./db');
 const collection_name = "todo";
+
+const schema = Joi.object().keys({
+  todo: Joi.string().required()
+});
+
 
 
 app.get("/", (req, res) => {
@@ -24,16 +30,34 @@ app.get("/getTodos", (req, res) => {
   });
 });
 
+
+
 app.post("/", (req, res) => {
+
     const userInput  = req.body;
+
+    Joi.validate(userInput, schema, (err, result) => {
+      if (err) {
+
+          throw new Error("Invalid Input");
+
+          // error.code = 400;
+          next(error);
+          console.log(next(error));
+      }
+    });
+
     db.getDB().collection('todo').insertOne(userInput, (err, result) => {
       if (err) {
-        console.log(err);
+        const error = new Error("Failed to insert todo document.");
+        // error.code = 400;
+        next(error);
       } else {
-        console.log(result);
        res.json({
          result: result,
-         document: result.ops[0]
+         document: result.ops[0],
+         msg: "Successfully inserted!",
+         error: null
        })
       }
     });
@@ -74,7 +98,13 @@ app.delete('/:id', (req, res) => {
   });
 });
 
-
+app.use( (err, req, res, next) => {
+    res.status(err.status).json({
+      error: {
+        message: err.message
+      }
+    });
+});
 
 
 db.connect((err) => {
